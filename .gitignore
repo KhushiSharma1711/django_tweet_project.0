@@ -1,1 +1,2 @@
 mainfile/media/videos/*.mp4
+__pycache__/
