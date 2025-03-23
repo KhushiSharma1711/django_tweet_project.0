@@ -1,56 +1,178 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Tweet Django
+Tweet App - Home
 {% endblock title %}
 
 {% block content %}
-<h1 class="text-center mt-4">WELCOME TO DJANGO PROJECT</h1>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="text-center mb-4" style="color: var(--hot-pink);">
+        <i class="fas fa-stream"></i> Tweet Feed
+      </h1>
 
-<!-- Create Tweet Button -->
-<div class="text-center my-4">
-    {% if user.is_authenticated %}
-    <a class="btn btn-primary" href="{% url 'tweet_create' %}">Create Tweet</a>
-    {% else %}
-    <p>Please <a href="{% url 'login' %}">login</a> to create tweets.</p>
-    {% endif %}
-</div>
+      <!-- Create Tweet Button -->
+      <div class="text-center mb-4">
+        {% if user.is_authenticated %}
+        <a class="btn btn-primary btn-lg" href="{% url 'tweet_create' %}">
+          <i class="fas fa-feather-alt"></i> Create New Tweet
+        </a>
+        {% else %}
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i> Please <a href="{% url 'login' %}">login</a> to create tweets.
+        </div>
+        {% endif %}
+      </div>
 
-<!-- Tweet List -->
-<div class="container">
-    <div class="row d-flex flex-wrap justify-content-center gap-4">
-        
-        {% if tweets %}
-            {% for tweet in tweets %}
-            <div class="card" style="width: 18rem; margin: 10px;">
-                
-                <!-- Tweet Image -->
-                {% if tweet.img %}
-                <img src="{{ tweet.img.url }}" class="card-img-top" alt="Tweet Image">
-                {% endif %}
-                
-                <div class="card-body">
-                    <h5 class="card-title">@{{ tweet.user.username }}</h5>
-                    <p class="card-text">{{ tweet.content }}</p>
-                    <small class="text-muted">{{ tweet.created_at|date:"F d, Y H:i A" }}</small>
-                    
-                    <!-- Edit & Delete Buttons (Only for the Tweet Owner) -->
-                    {% if tweet.user == request.user %}
-                    <div class="d-flex justify-content-between mt-3">
-                        <a href="{% url 'tweet_edit' tweet.id %}" class="btn btn-sm btn-primary">Edit</a>
-                        <a href="{% url 'tweet_delete' tweet.id %}" class="btn btn-sm btn-danger">Delete</a>
+      <!-- Tweet Grid Layout -->
+      {% if tweets %}
+        <div class="tweets-grid">
+          {% for tweet in tweets %}
+          <div class="tweet-grid-item">
+            <div class="card tweet-card {% if not tweet.has_media %}text-only{% else %}with-media{% endif %} card-equal-height">
+              <div class="card-body safari-fix">
+                <div class="tweet-header">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="tweet-user">
+                      <i class="fas fa-user-circle"></i> @{{ tweet.user.username }}
                     </div>
+                    <div class="tweet-time">
+                      <i class="far fa-clock"></i> {{ tweet.created_at|date:"F d, Y H:i A" }}
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="tweet-content-container">
+                  <div class="tweet-content">
+                    {{ tweet.content }}
+                  </div>
+                  
+                  <div class="tweet-media-container">
+                    {% if tweet.img_url %}
+                    <img src="{{ tweet.img_url }}" class="img-fluid tweet-img" alt="Tweet Image">
                     {% endif %}
                     
-                    <a href="{% url 'tweet_detail' tweet.id %}" class="btn btn-sm btn-info mt-2 w-100">View Details</a>
+                    {% if tweet.img %}
+                    <img src="{{ tweet.img.url }}" class="img-fluid tweet-img" alt="Tweet Image">
+                    {% endif %}
+                    
+                    {% if tweet.video %}
+                    <video class="img-fluid tweet-video" controls>
+                      <source src="{{ tweet.video.url }}" type="video/mp4">
+                      Your browser does not support the video tag.
+                    </video>
+                    {% endif %}
+                  </div>
                 </div>
+                
+                <div class="tweet-footer">
+                  <div class="tweet-actions">
+                    <div>
+                      <button class="action-btn like-btn {% if user in tweet.likes.all %}liked{% endif %}" data-tweet-id="{{ tweet.id }}">
+                        <i class="fas fa-thumbs-up"></i>
+                        <span id="like-count-{{ tweet.id }}" class="action-count">{{ tweet.likes.count }}</span>
+                      </button>
+                      <button class="action-btn dislike-btn {% if user in tweet.dislikes.all %}disliked{% endif %}" data-tweet-id="{{ tweet.id }}">
+                        <i class="fas fa-thumbs-down"></i>
+                        <span id="dislike-count-{{ tweet.id }}" class="action-count">{{ tweet.dislikes.count }}</span>
+                      </button>
+                      <a href="{% url 'tweet_detail' tweet.id %}" class="action-btn">
+                        <i class="fas fa-expand-alt"></i>
+                      </a>
+                    </div>
+                    
+                    {% if tweet.user == request.user %}
+                    <div>
+                      <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a href="{% url 'tweet_delete' tweet.id %}" class="action-btn">
+                        <i class="fas fa-trash-alt"></i>
+                      </a>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-center text-dark">No tweets available. Be the first to post!</p>
-        {% endif %}
-        
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-secondary text-center">
+          <i class="fas fa-info-circle"></i> No tweets available. Be the first to post!
+        </div>
+      {% endif %}
     </div>
+  </div>
 </div>
+
+<!-- JavaScript for Masonry-like layout -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Function to adjust grid layout based on screen size
+    function adjustGridLayout() {
+      const tweetsGrid = document.querySelector('.tweets-grid');
+      if (!tweetsGrid) return;
+      
+      // Get all tweet cards
+      const tweetCards = document.querySelectorAll('.tweet-card');
+      
+      // Reset heights for recalculation
+      tweetCards.forEach(card => {
+        card.style.height = 'auto';
+      });
+      
+      // On mobile, don't do any height adjustments
+      if (window.innerWidth < 768) return;
+      
+      // Group cards by row for equal height
+      const rows = {};
+      const gridItems = document.querySelectorAll('.tweet-grid-item');
+      
+      gridItems.forEach((item, index) => {
+        // Calculate which row this item belongs to based on its position
+        const rect = item.getBoundingClientRect();
+        const rowKey = Math.round(rect.top);
+        
+        if (!rows[rowKey]) {
+          rows[rowKey] = [];
+        }
+        
+        rows[rowKey].push(item.querySelector('.tweet-card'));
+      });
+      
+      // Set equal height for cards in the same row
+      Object.values(rows).forEach(rowCards => {
+        if (rowCards.length <= 1) return;
+        
+        let maxHeight = 0;
+        rowCards.forEach(card => {
+          const height = card.offsetHeight;
+          if (height > maxHeight) {
+            maxHeight = height;
+          }
+        });
+        
+        rowCards.forEach(card => {
+          card.style.height = `${maxHeight}px`;
+        });
+      });
+    }
+    
+    // Run on load and resize
+    adjustGridLayout();
+    window.addEventListener('resize', adjustGridLayout);
+    
+    // Also run after images load to account for dynamic content
+    window.addEventListener('load', adjustGridLayout);
+    
+    // Add event listener for media loading
+    document.querySelectorAll('.tweet-img, .tweet-video').forEach(media => {
+      media.addEventListener('load', adjustGridLayout);
+    });
+  });
+</script>
 {% endblock content %}
 

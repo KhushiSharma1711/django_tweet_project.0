@@ -1,17 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .forms import UserTweetForm
 from .models import Tweet
 from django import forms
 
 # Tweet form class
 class TweetForm(forms.ModelForm):
+    img_url = forms.URLField(required=False, label="Image URL (optional)",
+                           widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Paste image URL here'}))
+    
     class Meta:
         model = Tweet
-        fields = ['content', 'img']
+        fields = ['content', 'img_url', 'img', 'video']
         widgets = {
-            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What\'s happening?'}),
+            'img': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
+            'video': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'video/*'}),
         }
 
 def register(request):
@@ -74,4 +80,42 @@ def tweet_delete(request, pk):
         tweet.delete()
         return redirect('tweet_list')
     return render(request, 'delete.html', {'tweet': tweet})
+
+@login_required
+def like_tweet(request, pk):
+    tweet = get_object_or_404(Tweet, pk=pk)
+    if request.user in tweet.likes.all():
+        tweet.likes.remove(request.user)
+        liked = False
+    else:
+        tweet.likes.add(request.user)
+        liked = True
+        # Remove dislike if exists
+        if request.user in tweet.dislikes.all():
+            tweet.dislikes.remove(request.user)
+    
+    return JsonResponse({
+        'liked': liked,
+        'total_likes': tweet.total_likes(),
+        'total_dislikes': tweet.total_dislikes()
+    })
+
+@login_required
+def dislike_tweet(request, pk):
+    tweet = get_object_or_404(Tweet, pk=pk)
+    if request.user in tweet.dislikes.all():
+        tweet.dislikes.remove(request.user)
+        disliked = False
+    else:
+        tweet.dislikes.add(request.user)
+        disliked = True
+        # Remove like if exists
+        if request.user in tweet.likes.all():
+            tweet.likes.remove(request.user)
+    
+    return JsonResponse({
+        'disliked': disliked,
+        'total_likes': tweet.total_likes(),
+        'total_dislikes': tweet.total_dislikes()
+    })
 

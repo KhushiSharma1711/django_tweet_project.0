@@ -1,32 +1,76 @@
 {% extends "layout.html" %}
 
-{% block title %}
-Tweet Detail
-{% endblock title %}
+{% block title %}Tweet Detail{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card tweet-card card-equal-height">
         <div class="card-header">
-            <h5>@{{ tweet.user.username }}</h5>
-            <small class="text-muted">{{ tweet.created_at|date:"F d, Y H:i A" }}</small>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0"><i class="fas fa-user-circle"></i> @{{ tweet.user.username }}</h5>
+            <small class="text-white"><i class="far fa-clock"></i> {{ tweet.created_at|date:"F d, Y H:i A" }}</small>
+          </div>
         </div>
-        <div class="card-body">
-            {% if tweet.img %}
-            <img src="{{ tweet.img.url }}" class="img-fluid mb-3" alt="Tweet Image">
-            {% endif %}
-            <p class="card-text">{{ tweet.content }}</p>
+        <div class="card-body safari-fix">
+          <div class="tweet-content-container">
+            <div class="tweet-content">
+              {{ tweet.content }}
+            </div>
+            
+            <div class="tweet-media-container">
+              {% if tweet.img_url %}
+              <img src="{{ tweet.img_url }}" class="img-fluid tweet-img" alt="Tweet Image">
+              {% endif %}
+              
+              {% if tweet.img %}
+              <img src="{{ tweet.img.url }}" class="img-fluid tweet-img" alt="Tweet Image">
+              {% endif %}
+              
+              {% if tweet.video %}
+              <video class="img-fluid tweet-video" controls>
+                <source src="{{ tweet.video.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="tweet-footer">
+            <div class="tweet-actions">
+              <div>
+                <button class="action-btn like-btn {% if user in tweet.likes.all %}liked{% endif %}" data-tweet-id="{{ tweet.id }}">
+                  <i class="fas fa-thumbs-up"></i>
+                  <span id="like-count-{{ tweet.id }}" class="action-count">{{ tweet.likes.count }}</span>
+                </button>
+                <button class="action-btn dislike-btn {% if user in tweet.dislikes.all %}disliked{% endif %}" data-tweet-id="{{ tweet.id }}">
+                  <i class="fas fa-thumbs-down"></i>
+                  <span id="dislike-count-{{ tweet.id }}" class="action-count">{{ tweet.dislikes.count }}</span>
+                </button>
+              </div>
+              
+              {% if tweet.user == request.user %}
+              <div>
+                <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'tweet_delete' tweet.id %}" class="action-btn">
+                  <i class="fas fa-trash-alt"></i>
+                </a>
+              </div>
+              {% endif %}
+            </div>
+          </div>
         </div>
         <div class="card-footer">
-            {% if tweet.user == request.user %}
-            <div class="d-flex justify-content-between">
-                <a href="{% url 'tweet_edit' tweet.id %}" class="btn btn-primary">Edit</a>
-                <a href="{% url 'tweet_delete' tweet.id %}" class="btn btn-danger">Delete</a>
-            </div>
-            {% endif %}
-            <a href="{% url 'tweet_list' %}" class="btn btn-secondary mt-3">Back to tweet list</a>
+          <a href="{% url 'tweet_list' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Tweet Feed
+          </a>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 

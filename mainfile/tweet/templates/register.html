@@ -1,62 +1,66 @@
 {% extends "layout.html" %}
 
+{% block title %}Register{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card mt-4">
-            <div class="card-header">
-                <h2 class="text-center">Register</h2>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    {% if form.errors %}
-                    <div class="alert alert-danger">
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <p>{{ field.label }}: {{ error }}</p>
-                            {% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    
-                    <div class="form-group">
-                        <label for="id_username">Username</label>
-                        <input type="text" name="username" class="form-control" id="id_username" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_email">Email</label>
-                        <input type="email" name="email" class="form-control" id="id_email" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_password1">Password</label>
-                        <input type="password" name="password1" class="form-control" id="id_password1" required>
-                        <small class="form-text text-muted">
-                            Your password can't be too similar to your other personal information.
-                            Your password must contain at least 8 characters.
-                            Your password can't be a commonly used password.
-                            Your password can't be entirely numeric.
-                        </small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_password2">Confirm Password</label>
-                        <input type="password" name="password2" class="form-control" id="id_password2" required>
-                        <small class="form-text text-muted">Enter the same password as before, for verification.</small>
-                    </div>
-                    
-                    <button class="btn btn-primary btn-block mt-3" type="submit">Register</button>
-                </form>
-                <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
-            </div>
-        </div>
+<div class="auth-container">
+  <div class="card auth-card">
+    <div class="auth-header">
+      <h2><i class="fas fa-user-plus"></i> Register</h2>
     </div>
+    <div class="auth-body">
+      <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p><i class="fas fa-exclamation-circle"></i> {{ field.label }}: {{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <p><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+          <label for="id_username"><i class="fas fa-user"></i> Username</label>
+          <input type="text" name="username" class="form-control" id="id_username" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="id_email"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" name="email" class="form-control" id="id_email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="id_password1"><i class="fas fa-lock"></i> Password</label>
+          <input type="password" name="password1" class="form-control" id="id_password1" required>
+          <small class="form-text text-muted">
+            <ul class="pl-3">
+              <li>Your password can't be too similar to your other personal information.</li>
+              <li>Your password must contain at least 8 characters.</li>
+              <li>Your password can't be a commonly used password.</li>
+              <li>Your password can't be entirely numeric.</li>
+            </ul>
+          </small>
+        </div>
+        
+        <div class="form-group">
+          <label for="id_password2"><i class="fas fa-lock"></i> Confirm Password</label>
+          <input type="password" name="password2" class="form-control" id="id_password2" required>
+          <small class="form-text text-muted">Enter the same password as before, for verification.</small>
+        </div>
+        
+        <button class="btn btn-primary btn-block mt-4" type="submit">
+          <i class="fas fa-user-plus"></i> Register
+        </button>
+      </form>
+      <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
