@@ -39,7 +39,7 @@
           
           <div class="tweet-footer">
             <div class="tweet-actions">
-              <div>
+              <div class="action-group">
                 <button class="action-btn like-btn {% if user in tweet.likes.all %}liked{% endif %}" data-tweet-id="{{ tweet.id }}">
                   <i class="fas fa-thumbs-up"></i>
                   <span id="like-count-{{ tweet.id }}" class="action-count">{{ tweet.likes.count }}</span>
@@ -48,10 +48,14 @@
                   <i class="fas fa-thumbs-down"></i>
                   <span id="dislike-count-{{ tweet.id }}" class="action-count">{{ tweet.dislikes.count }}</span>
                 </button>
+                <span class="action-btn">
+                  <i class="fas fa-comment"></i>
+                  <span class="action-count">{{ comments.count }}</span>
+                </span>
               </div>
               
               {% if tweet.user == request.user %}
-              <div>
+              <div class="edit-delete-group">
                 <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
                   <i class="fas fa-edit"></i>
                 </a>
@@ -69,8 +73,138 @@
           </a>
         </div>
       </div>
+      
+      <!-- Comments Section -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h5 class="m-0"><i class="fas fa-comments"></i> Comments ({{ comments.count }})</h5>
+        </div>
+        <div class="card-body">
+          {% if user.is_authenticated %}
+          <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+              {{ comment_form.content }}
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane"></i> Post Comment
+            </button>
+          </form>
+          {% else %}
+          <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle"></i> Please <a href="{% url 'login' %}">login</a> to comment.
+          </div>
+          {% endif %}
+          
+          {% if comments %}
+            {% for comment in comments %}
+            <div class="comment-container">
+              <div class="comment-header">
+                <div class="comment-user">
+                  <i class="fas fa-user-circle"></i> @{{ comment.user.username }}
+                </div>
+                <div class="comment-time">
+                  <i class="far fa-clock"></i> {{ comment.created_at|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div class="comment-content">
+                {{ comment.content }}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center text-muted my-3">No comments yet. Be the first to comment!</div>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Like button functionality
+    document.querySelector('.like-btn').addEventListener('click', function() {
+      const tweetId = this.getAttribute('data-tweet-id');
+      
+      fetch(`/tweet/${tweetId}/like/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Update like count
+        document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
+        
+        // Update dislike count
+        document.querySelector(`#dislike-count-${tweetId}`).textContent = data.total_dislikes;
+        
+        // Update button states
+        if (data.liked) {
+          this.classList.add('liked');
+          document.querySelector('.dislike-btn').classList.remove('disliked');
+        } else {
+          this.classList.remove('liked');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+    
+    // Dislike button functionality
+    document.querySelector('.dislike-btn').addEventListener('click', function() {
+      const tweetId = this.getAttribute('data-tweet-id');
+      
+      fetch(`/tweet/${tweetId}/dislike/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Update like count
+        document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
+        
+        // Update dislike count
+        document.querySelector(`#dislike-count-${tweetId}`).textContent = data.total_dislikes;
+        
+        // Update button states
+        if (data.disliked) {
+          this.classList.add('disliked');
+          document.querySelector('.like-btn').classList.remove('liked');
+        } else {
+          this.classList.remove('disliked');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+    
+    // Function to get CSRF token
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  });
+</script>
 {% endblock %}
 

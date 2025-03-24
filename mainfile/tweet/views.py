@@ -3,14 +3,14 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import UserTweetForm
-from .models import Tweet
+from .models import Tweet, Comment
 from django import forms
 
 # Tweet form class
 class TweetForm(forms.ModelForm):
     img_url = forms.URLField(required=False, label="Image URL (optional)",
-                           widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Paste image URL here'}))
-    
+                         widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Paste image URL here'}))
+  
     class Meta:
         model = Tweet
         fields = ['content', 'img_url', 'img', 'video']
@@ -18,6 +18,15 @@ class TweetForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What\'s happening?'}),
             'img': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
             'video': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'video/*'}),
+        }
+
+# Comment form class
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Write a comment...'}),
         }
 
 def register(request):
@@ -34,12 +43,29 @@ def register(request):
 # Tweet views
 def tweet_list(request):
     tweets = Tweet.objects.all().order_by('-created_at')
-    return render(request, 'tweet_list.html', {'tweets': tweets})
+    comment_form = CommentForm()
+    return render(request, 'tweet_list.html', {'tweets': tweets, 'comment_form': comment_form})
 
 @login_required
 def tweet_detail(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
-    return render(request, 'tweet_detail.html', {'tweet': tweet})
+    comments = tweet.comments.all()
+    comment_form = CommentForm()
+    
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.tweet = tweet
+            comment.user = request.user
+            comment.save()
+            return redirect('tweet_detail', pk=pk)
+            
+    return render(request, 'tweet_detail.html', {
+        'tweet': tweet, 
+        'comments': comments,
+        'comment_form': comment_form
+    })
 
 @login_required
 def tweet_new(request):
@@ -59,7 +85,7 @@ def tweet_edit(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
     if tweet.user != request.user:
         return redirect('tweet_list')
-    
+  
     if request.method == "POST":
         form = TweetForm(request.POST, request.FILES, instance=tweet)
         if form.is_valid():
@@ -75,7 +101,7 @@ def tweet_delete(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
     if tweet.user != request.user:
         return redirect('tweet_list')
-    
+  
     if request.method == "POST":
         tweet.delete()
         return redirect('tweet_list')
@@ -93,7 +119,7 @@ def like_tweet(request, pk):
         # Remove dislike if exists
         if request.user in tweet.dislikes.all():
             tweet.dislikes.remove(request.user)
-    
+  
     return JsonResponse({
         'liked': liked,
         'total_likes': tweet.total_likes(),
@@ -112,10 +138,61 @@ def dislike_tweet(request, pk):
         # Remove like if exists
         if request.user in tweet.likes.all():
             tweet.likes.remove(request.user)
-    
+  
     return JsonResponse({
         'disliked': disliked,
         'total_likes': tweet.total_likes(),
         'total_dislikes': tweet.total_dislikes()
+    })
+
+@login_required
+def add_comment(request, pk):
+    tweet = get_object_or_404(Tweet, pk=pk)
+    
+    if request.method == "POST":
+        content = request.POST.get('content', '').strip()
+        if content:
+            comment = Comment.objects.create(
+                tweet=tweet,
+                user=request.user,
+                content=content
+            )
+            
+            # Return JSON for AJAX requests
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'comment_id': comment.id,
+                    'username': comment.user.username,
+                    'content': comment.content,
+                    'created_at': comment.created_at.strftime("%b %d, %Y, %I:%M %p"),
+                    'total_comments': tweet.comments.count()
+                })
+        
+        # Return error for AJAX requests
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Comment cannot be empty'})
+            
+    return redirect('tweet_detail', pk=pk)
+
+@login_required
+def get_comments(request, pk):
+    tweet = get_object_or_404(Tweet, pk=pk)
+    comments = tweet.comments.all()
+    
+    comments_data = []
+    for comment in comments:
+        comments_data.append({
+            'id': comment.id,
+            'username': comment.user.username,
+            'content': comment.content,
+            'created_at': comment.created_at.strftime("%b %d, %Y, %I:%M %p"),
+            'is_owner': comment.user == request.user
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'comments': comments_data,
+        'total_comments': len(comments_data)
     })
 

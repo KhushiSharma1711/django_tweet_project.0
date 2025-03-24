@@ -1,394 +1,503 @@
 :root {
-    --hot-pink: #ff69b4;
-    --dark-pink: #ff1493;
-    --light-gray: #333333;
-    --dark-gray: #222222;
-    --black: #121212;
-    --white: #ffffff;
-  }
-  
-  body {
-    background-color: var(--black);
-    color: var(--white);
-  }
-  
-  .navbar {
-    background-color: var(--black) !important;
-    border-bottom: 1px solid var(--light-gray);
-  }
-  
-  .navbar-brand {
-    font-weight: bold;
-    color: var(--white) !important;
-  }
-  
-  .navbar-light .navbar-nav .nav-link {
-    color: var(--white) !important;
-  }
-  
-  .navbar-light .navbar-nav .nav-link:hover {
-    color: var(--hot-pink) !important;
-  }
-  
-  .btn-primary {
-    background-color: var(--hot-pink);
-    border-color: var(--hot-pink);
-  }
-  
-  .btn-primary:hover {
-    background-color: var(--dark-pink);
-    border-color: var(--dark-pink);
-  }
-  
-  .btn-outline-primary {
-    color: var(--hot-pink);
-    border-color: var(--hot-pink);
-  }
-  
-  .btn-outline-primary:hover {
-    background-color: var(--hot-pink);
-    border-color: var(--hot-pink);
-  }
-  
-  .btn-danger {
-    background-color: var(--hot-pink);
-    border-color: var(--hot-pink);
-  }
-  
-  .btn-danger:hover {
-    background-color: var(--dark-pink);
-    border-color: var(--dark-pink);
-  }
-  
-  .btn-outline-light:hover {
-    color: var(--black);
-    background-color: var(--hot-pink);
-    border-color: var(--hot-pink);
-  }
-  
-  .card {
-    background-color: var(--dark-gray);
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
-    border: 1px solid var(--light-gray);
-    transition: transform 0.2s;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .card-header {
-    background-color: var(--light-gray);
-    color: var(--white);
-    border-top-left-radius: 10px !important;
-    border-top-right-radius: 10px !important;
-    border-bottom: 1px solid var(--light-gray);
-  }
-  
-  .tweet-card {
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  
-  .tweet-card.text-only .card-body {
-    padding-bottom: 40px;
-  }
-  
-  .tweet-actions {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 10px;
-    border-top: 1px solid var(--light-gray);
-    margin-top: auto;
-  }
-  
-  .action-btn {
-    background: none;
-    border: none;
-    color: var(--white);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: color 0.2s;
-  }
-  
-  .action-btn:hover {
-    color: var(--hot-pink);
-  }
-  
-  .action-btn i {
-    margin-right: 5px;
-  }
-  
-  .action-count {
-    font-size: 0.9rem;
-    margin-left: 5px;
-  }
-  
-  .tweet-user {
-    font-weight: bold;
-    color: var(--hot-pink);
-  }
-  
-  .tweet-time {
-    color: #aaaaaa;
-    font-size: 0.8rem;
-  }
-  
-  .tweet-content {
-    margin: 15px 0;
-    word-wrap: break-word;
-  }
-  
-  .tweet-img,
-  .tweet-video {
-    max-height: 300px;
-    object-fit: contain;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    background-color: var(--light-gray);
-  }
-  
-  .auth-container {
-    max-width: 500px;
-    margin: 50px auto;
-  }
-  
-  .auth-card {
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    background-color: var(--dark-gray);
-  }
-  
-  .auth-header {
-    background-color: var(--light-gray);
-    color: var(--white);
-    text-align: center;
-    padding: 20px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-  }
-  
-  .auth-body {
-    padding: 30px;
-  }
-  
-  .form-control {
-    background-color: var(--light-gray);
-    border: 1px solid var(--light-gray);
-    color: var(--white);
-  }
-  
-  .form-control:focus {
-    background-color: var(--light-gray);
-    border-color: var(--hot-pink);
-    box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
-    color: var(--white);
-  }
-  
-  .form-control::placeholder {
-    color: #aaaaaa;
-  }
-  
-  .form-text {
-    color: #aaaaaa;
-  }
-  
-  .liked {
-    color: var(--hot-pink);
-  }
-  
-  .disliked {
-    color: var(--hot-pink);
-  }
-  
-  .alert {
-    background-color: var(--light-gray);
-    color: var(--white);
-    border: 1px solid var(--light-gray);
-  }
-  
-  .alert-danger {
-    background-color: rgba(220, 53, 69, 0.2);
-    border-color: rgba(220, 53, 69, 0.3);
-  }
-  
-  .alert-success {
-    background-color: rgba(40, 167, 69, 0.2);
-    border-color: rgba(40, 167, 69, 0.3);
-  }
-  
-  .alert-info {
-    background-color: rgba(23, 162, 184, 0.2);
-    border-color: rgba(23, 162, 184, 0.3);
-  }
-  
-  .alert-warning {
-    background-color: rgba(255, 193, 7, 0.2);
-    border-color: rgba(255, 193, 7, 0.3);
-  }
-  
-  .media-upload-container {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-  }
-  
-  .media-upload-label {
-    display: flex;
-    align-items: center;
-    margin-right: 15px;
-    cursor: pointer;
-    color: var(--white);
-    transition: color 0.2s;
-  }
-  
-  .media-upload-label:hover {
-    color: var(--hot-pink);
-  }
-  
-  .media-upload-label i {
-    font-size: 1.5rem;
-    margin-right: 5px;
-  }
-  
-  .media-upload-input {
-    display: none;
-  }
-  
-  .media-preview {
-    margin-top: 10px;
-    display: none;
-  }
-  
-  .media-preview img,
-  .media-preview video {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 10px;
-  }
-  
-  .media-filename {
-    margin-top: 5px;
-    font-size: 0.8rem;
-    color: #aaaaaa;
-  }
-  
-  a {
-    color: var(--hot-pink);
-  }
-  
-  a:hover {
-    color: var(--dark-pink);
-    text-decoration: none;
-  }
-  
-  .navbar-toggler {
-    background-color: var(--hot-pink);
-  }
-  
-  .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-  }
-  
-  /* Grid Layout Styles */
+  --hot-pink: #ff69b4;
+  --dark-pink: #ff1493;
+  --light-gray: #333333;
+  --dark-gray: #222222;
+  --black: #121212;
+  --white: #ffffff;
+}
+
+body {
+  background-color: var(--black);
+  color: var(--white);
+}
+
+.navbar {
+  background-color: var(--black) !important;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: var(--white) !important;
+}
+
+.navbar-light .navbar-nav .nav-link {
+  color: var(--white) !important;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+  color: var(--hot-pink) !important;
+}
+
+.btn-primary {
+  background-color: var(--hot-pink);
+  border-color: var(--hot-pink);
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-pink);
+  border-color: var(--dark-pink);
+}
+
+.btn-outline-primary {
+  color: var(--hot-pink);
+  border-color: var(--hot-pink);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--hot-pink);
+  border-color: var(--hot-pink);
+}
+
+.btn-danger {
+  background-color: var(--hot-pink);
+  border-color: var(--hot-pink);
+}
+
+.btn-danger:hover {
+  background-color: var(--dark-pink);
+  border-color: var(--dark-pink);
+}
+
+.btn-outline-light:hover {
+  color: var(--black);
+  background-color: var(--hot-pink);
+  border-color: var(--hot-pink);
+}
+
+.card {
+  background-color: var(--dark-gray);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  border: 1px solid var(--light-gray);
+  transition: transform 0.2s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  background-color: var(--light-gray);
+  color: var(--white);
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.tweet-card {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.tweet-card.text-only .card-body {
+  padding-bottom: 40px;
+}
+
+.tweet-actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--light-gray);
+  margin-top: auto;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+  margin-right: 15px;
+}
+
+.action-btn:last-child {
+  margin-right: 0;
+}
+
+.action-btn:hover {
+  color: var(--hot-pink);
+}
+
+.action-btn i {
+  margin-right: 5px;
+}
+
+.action-count {
+  font-size: 0.9rem;
+  margin-left: 5px;
+}
+
+.tweet-user {
+  font-weight: bold;
+  color: var(--hot-pink);
+}
+
+.tweet-time {
+  color: #aaaaaa;
+  font-size: 0.8rem;
+}
+
+.tweet-content {
+  margin: 15px 0;
+  word-wrap: break-word;
+}
+
+.tweet-img,
+.tweet-video {
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  background-color: var(--light-gray);
+}
+
+.auth-container {
+  max-width: 500px;
+  margin: 50px auto;
+}
+
+.auth-card {
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  background-color: var(--dark-gray);
+}
+
+.auth-header {
+  background-color: var(--light-gray);
+  color: var(--white);
+  text-align: center;
+  padding: 20px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.auth-body {
+  padding: 30px;
+}
+
+.form-control {
+  background-color: var(--light-gray);
+  border: 1px solid var(--light-gray);
+  color: var(--white);
+}
+
+.form-control:focus {
+  background-color: var(--light-gray);
+  border-color: var(--hot-pink);
+  box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
+  color: var(--white);
+}
+
+.form-control::placeholder {
+  color: #aaaaaa;
+}
+
+.form-text {
+  color: #aaaaaa;
+}
+
+.liked {
+  color: var(--hot-pink);
+}
+
+.disliked {
+  color: var(--hot-pink);
+}
+
+.alert {
+  background-color: var(--light-gray);
+  color: var(--white);
+  border: 1px solid var(--light-gray);
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.2);
+  border-color: rgba(220, 53, 69, 0.3);
+}
+
+.alert-success {
+  background-color: rgba(40, 167, 69, 0.2);
+  border-color: rgba(40, 167, 69, 0.3);
+}
+
+.alert-info {
+  background-color: rgba(23, 162, 184, 0.2);
+  border-color: rgba(23, 162, 184, 0.3);
+}
+
+.alert-warning {
+  background-color: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.3);
+}
+
+.media-upload-container {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.media-upload-label {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  cursor: pointer;
+  color: var(--white);
+  transition: color 0.2s;
+}
+
+.media-upload-label:hover {
+  color: var(--hot-pink);
+}
+
+.media-upload-label i {
+  font-size: 1.5rem;
+  margin-right: 5px;
+}
+
+.media-upload-input {
+  display: none;
+}
+
+.media-preview {
+  margin-top: 10px;
+  display: none;
+}
+
+.media-preview img,
+.media-preview video {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 10px;
+}
+
+.media-filename {
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #aaaaaa;
+}
+
+a {
+  color: var(--hot-pink);
+}
+
+a:hover {
+  color: var(--dark-pink);
+  text-decoration: none;
+}
+
+.navbar-toggler {
+  background-color: var(--hot-pink);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Grid Layout Styles */
+.tweets-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -10px;
+}
+
+.tweet-grid-item {
+  padding: 10px;
+  display: flex;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.tweet-content-container {
+  flex-grow: 1;
+}
+
+.tweet-media-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.tweet-header {
+  margin-bottom: 10px;
+}
+
+.tweet-footer {
+  margin-top: auto;
+}
+
+/* Equal height cards */
+.card-equal-height {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-equal-height .card-body {
+  flex: 1;
+}
+
+/* Masonry-like layout for different content lengths */
+@media (min-width: 768px) {
   .tweets-grid {
-    display: flex;
-    flex-wrap: wrap;
-    margin: -10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
   }
-  
+}
+
+@media (min-width: 992px) {
+  .tweets-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .tweets-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Ensure proper spacing on mobile */
+@media (max-width: 767.98px) {
+  .tweets-grid {
+    display: block;
+  }
+
   .tweet-grid-item {
-    padding: 10px;
-    display: flex;
+    width: 100%;
   }
-  
-  .card-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  
-  .tweet-content-container {
-    flex-grow: 1;
-  }
-  
-  .tweet-media-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .tweet-header {
-    margin-bottom: 10px;
-  }
-  
-  .tweet-footer {
-    margin-top: auto;
-  }
-  
-  /* Equal height cards */
-  .card-equal-height {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .card-equal-height .card-body {
-    flex: 1;
-  }
-  
-  /* Masonry-like layout for different content lengths */
-  @media (min-width: 768px) {
-    .tweets-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-gap: 20px;
-    }
-  }
-  
-  @media (min-width: 992px) {
-    .tweets-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  
-  @media (min-width: 1200px) {
-    .tweets-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-  
-  /* Ensure proper spacing on mobile */
-  @media (max-width: 767.98px) {
-    .tweets-grid {
-      display: block;
-    }
-  
-    .tweet-grid-item {
-      width: 100%;
-    }
-  }
-  
-  /* Adjust card heights for different content */
-  .tweet-card.text-only {
-    min-height: 180px;
-  }
-  
-  .tweet-card.with-media {
-    min-height: 300px;
-  }
-  
-  /* Fix for Safari flexbox issues */
-  .safari-fix {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  
+}
+
+/* Adjust card heights for different content */
+.tweet-card.text-only {
+  min-height: 180px;
+}
+
+.tweet-card.with-media {
+  min-height: 300px;
+}
+
+/* Fix for Safari flexbox issues */
+.safari-fix {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Comment styles */
+.comments-section {
+  margin-top: 20px;
+  border-top: 1px solid var(--light-gray);
+  padding-top: 15px;
+}
+
+.comment-container {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.comment-user {
+  font-weight: bold;
+  color: var(--hot-pink);
+}
+
+.comment-time {
+  font-size: 0.8rem;
+  color: #aaaaaa;
+}
+
+.comment-content {
+  word-wrap: break-word;
+}
+
+.comment-form {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed var(--light-gray);
+}
+
+.comments-toggle {
+  text-align: center;
+  margin-top: 10px;
+  cursor: pointer;
+  color: var(--hot-pink);
+  transition: opacity 0.2s;
+}
+
+.comments-toggle:hover {
+  opacity: 0.8;
+}
+
+.action-group {
+  display: flex;
+  align-items: center;
+}
+
+.comment-button {
+  display: flex;
+  align-items: center;
+  color: var(--white);
+  transition: color 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-right: 15px;
+}
+
+.comment-button:hover {
+  color: var(--hot-pink);
+}
+
+.comment-button i {
+  margin-right: 5px;
+}
+
+.comment-count {
+  font-size: 0.9rem;
+  margin-left: 5px;
+}
+
+.comment-section-hidden {
+  display: none;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: var(--hot-pink);
+  margin: 15px 0;
+}
+
+.edit-delete-group {
+  display: flex;
+  align-items: center;
+}
+
+.edit-delete-group .action-btn {
+  margin-left: 15px;
+}
+
+.edit-delete-group .action-btn:first-child {
+  margin-left: 0;
+}
+

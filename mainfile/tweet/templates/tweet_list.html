@@ -68,7 +68,7 @@ Tweet App - Home
                 
                 <div class="tweet-footer">
                   <div class="tweet-actions">
-                    <div>
+                    <div class="action-group">
                       <button class="action-btn like-btn {% if user in tweet.likes.all %}liked{% endif %}" data-tweet-id="{{ tweet.id }}">
                         <i class="fas fa-thumbs-up"></i>
                         <span id="like-count-{{ tweet.id }}" class="action-count">{{ tweet.likes.count }}</span>
@@ -77,19 +77,51 @@ Tweet App - Home
                         <i class="fas fa-thumbs-down"></i>
                         <span id="dislike-count-{{ tweet.id }}" class="action-count">{{ tweet.dislikes.count }}</span>
                       </button>
+                      <button class="comment-button" data-tweet-id="{{ tweet.id }}">
+                        <i class="fas fa-comment"></i>
+                        <span id="comment-count-{{ tweet.id }}" class="comment-count">{{ tweet.comments.count }}</span>
+                      </button>
                       <a href="{% url 'tweet_detail' tweet.id %}" class="action-btn">
                         <i class="fas fa-expand-alt"></i>
                       </a>
                     </div>
                     
                     {% if tweet.user == request.user %}
-                    <div>
+                    <div class="edit-delete-group">
                       <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
                         <i class="fas fa-edit"></i>
                       </a>
                       <a href="{% url 'tweet_delete' tweet.id %}" class="action-btn">
                         <i class="fas fa-trash-alt"></i>
                       </a>
+                    </div>
+                    {% endif %}
+                  </div>
+                  
+                  <!-- Comments Section -->
+                  <div id="comments-section-{{ tweet.id }}" class="comments-section comment-section-hidden">
+                    <div id="comments-container-{{ tweet.id }}">
+                      <!-- Comments will be loaded dynamically -->
+                      <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> Loading comments...
+                      </div>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                    <div class="comment-form">
+                      <form id="comment-form-{{ tweet.id }}" data-tweet-id="{{ tweet.id }}" class="comment-submit-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                          <textarea name="content" class="form-control" rows="2" placeholder="Write a comment..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                          <i class="fas fa-paper-plane"></i> Post Comment
+                        </button>
+                      </form>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mt-3">
+                      <i class="fas fa-info-circle"></i> Please <a href="{% url 'login' %}">login</a> to comment.
                     </div>
                     {% endif %}
                   </div>
@@ -111,6 +143,7 @@ Tweet App - Home
 <!-- JavaScript for Masonry-like layout -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Function to adjust grid layout based on screen size  function() {
     // Function to adjust grid layout based on screen size
     function adjustGridLayout() {
       const tweetsGrid = document.querySelector('.tweets-grid');
@@ -172,6 +205,195 @@ Tweet App - Home
     document.querySelectorAll('.tweet-img, .tweet-video').forEach(media => {
       media.addEventListener('load', adjustGridLayout);
     });
+    
+    // Handle like button clicks
+    document.querySelectorAll('.like-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const tweetId = this.getAttribute('data-tweet-id');
+        likeOrDislikeTweet(tweetId, 'like');
+      });
+    });
+    
+    // Handle dislike button clicks
+    document.querySelectorAll('.dislike-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const tweetId = this.getAttribute('data-tweet-id');
+        likeOrDislikeTweet(tweetId, 'dislike');
+      });
+    });
+    
+    // Function to handle like or dislike
+    function likeOrDislikeTweet(tweetId, action) {
+      const url = `/tweet/${tweetId}/${action}/`;
+      
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Update like count
+        document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
+        
+        // Update dislike count
+        document.querySelector(`#dislike-count-${tweetId}`).textContent = data.total_dislikes;
+        
+        // Update button states
+        const likeBtn = document.querySelector(`.like-btn[data-tweet-id="${tweetId}"]`);
+        const dislikeBtn = document.querySelector(`.dislike-btn[data-tweet-id="${tweetId}"]`);
+        
+        if (action === 'like') {
+          if (data.liked) {
+            likeBtn.classList.add('liked');
+            dislikeBtn.classList.remove('disliked');
+          } else {
+            likeBtn.classList.remove('liked');
+          }
+        } else {
+          if (data.disliked) {
+            dislikeBtn.classList.add('disliked');
+            likeBtn.classList.remove('liked');
+          } else {
+            dislikeBtn.classList.remove('disliked');
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+    
+    // Handle comment button clicks
+    document.querySelectorAll('.comment-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const tweetId = this.getAttribute('data-tweet-id');
+        const commentsSection = document.querySelector(`#comments-section-${tweetId}`);
+        
+        // Toggle comments section visibility
+        if (commentsSection.classList.contains('comment-section-hidden')) {
+          commentsSection.classList.remove('comment-section-hidden');
+          loadComments(tweetId);
+        } else {
+          commentsSection.classList.add('comment-section-hidden');
+        }
+      });
+    });
+    
+    // Function to load comments
+    function loadComments(tweetId) {
+      const commentsContainer = document.querySelector(`#comments-container-${tweetId}`);
+      
+      // Show loading spinner
+      commentsContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading comments...</div>';
+      
+      fetch(`/tweet/${tweetId}/comments/`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Build comments HTML
+          let commentsHTML = '';
+          
+          if (data.comments.length === 0) {
+            commentsHTML = '<div class="text-center text-muted my-3">No comments yet. Be the first to comment!</div>';
+          } else {
+            data.comments.forEach(comment => {
+              commentsHTML += `
+                <div class="comment-container">
+                  <div class="comment-header">
+                    <div class="comment-user">
+                      <i class="fas fa-user-circle"></i> @${comment.username}
+                    </div>
+                    <div class="comment-time">
+                      <i class="far fa-clock"></i> ${comment.created_at}
+                    </div>
+                  </div>
+                  <div class="comment-content">
+                    ${comment.content}
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          commentsContainer.innerHTML = commentsHTML;
+        } else {
+          commentsContainer.innerHTML = '<div class="alert alert-danger">Error loading comments</div>';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        commentsContainer.innerHTML = '<div class="alert alert-danger">Error loading comments</div>';
+      });
+    }
+    
+    // Handle comment form submissions
+    document.querySelectorAll('.comment-submit-form').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const tweetId = this.getAttribute('data-tweet-id');
+        const contentInput = this.querySelector('textarea[name="content"]');
+        const content = contentInput.value.trim();
+        
+        if (!content) return;
+        
+        const formData = new FormData();
+        formData.append('content', content);
+        
+        fetch(`/tweet/${tweetId}/comment/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Clear input
+            contentInput.value = '';
+            
+            // Reload comments
+            loadComments(tweetId);
+            
+            // Update comment count
+            const commentCount = document.querySelector(`#comment-count-${tweetId}`);
+            commentCount.textContent = parseInt(commentCount.textContent) + 1;
+          } else {
+            alert('Error: ' + (data.error || 'Could not add comment'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error adding comment');
+        });
+      });
+    });
+    
+    // Function to get CSRF token
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
   });
 </script>
 {% endblock content %}
