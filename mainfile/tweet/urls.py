@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from .views import like_tweet, dislike_tweet
 
 urlpatterns = [
     path('', views.tweet_list, name='tweet_list'),
@@ -10,6 +11,8 @@ urlpatterns = [
     path('tweet/<int:pk>/delete/', views.tweet_delete, name='tweet_delete'),
     path('tweet/<int:pk>/like/', views.like_tweet, name='like_tweet'),
     path('tweet/<int:pk>/dislike/', views.dislike_tweet, name='dislike_tweet'),
+     path('<int:pk>/like/', like_tweet, name='like_tweet'),
+    path('<int:pk>/dislike/', dislike_tweet, name='dislike_tweet'),
     path('tweet/<int:pk>/comment/', views.add_comment, name='add_comment'),
     path('tweet/<int:pk>/comments/', views.get_comments, name='get_comments'),
     path('register/', views.register, name='register'),

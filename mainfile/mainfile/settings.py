@@ -133,3 +133,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/tweet/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+

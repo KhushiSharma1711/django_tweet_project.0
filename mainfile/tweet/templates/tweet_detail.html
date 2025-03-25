@@ -15,10 +15,23 @@
         </div>
         <div class="card-body safari-fix">
           <div class="tweet-content-container">
+            <!-- Edit/Delete buttons -->
+            {% if tweet.user == request.user %}
+            <div class="tweet-controls">
+              <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a href="{% url 'tweet_delete' tweet.id %}" class="action-btn">
+                <i class="fas fa-trash-alt"></i>
+              </a>
+            </div>
+            {% endif %}
+            
             <div class="tweet-content">
               {{ tweet.content }}
             </div>
             
+            {% if tweet.has_media %}
             <div class="tweet-media-container">
               {% if tweet.img_url %}
               <img src="{{ tweet.img_url }}" class="img-fluid tweet-img" alt="Tweet Image">
@@ -35,6 +48,7 @@
               </video>
               {% endif %}
             </div>
+            {% endif %}
           </div>
           
           <div class="tweet-footer">
@@ -53,17 +67,6 @@
                   <span class="action-count">{{ comments.count }}</span>
                 </span>
               </div>
-              
-              {% if tweet.user == request.user %}
-              <div class="edit-delete-group">
-                <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <a href="{% url 'tweet_delete' tweet.id %}" class="action-btn">
-                  <i class="fas fa-trash-alt"></i>
-                </a>
-              </div>
-              {% endif %}
             </div>
           </div>
         </div>
@@ -125,68 +128,94 @@
   document.addEventListener('DOMContentLoaded', function() {
     // Like button functionality
     document.querySelector('.like-btn').addEventListener('click', function() {
-      const tweetId = this.getAttribute('data-tweet-id');
-      
-      fetch(`/tweet/${tweetId}/like/`, {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': getCookie('csrftoken'),
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Update like count
-        document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
+      if (!this.classList.contains('processing')) {
+        this.classList.add('processing');
+        const tweetId = this.getAttribute('data-tweet-id');
         
-        // Update dislike count
-        document.querySelector(`#dislike-count-${tweetId}`).textContent = data.total_dislikes;
-        
-        // Update button states
-        if (data.liked) {
-          this.classList.add('liked');
-          document.querySelector('.dislike-btn').classList.remove('disliked');
-        } else {
-          this.classList.remove('liked');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+        fetch(`/tweet/${tweetId}/like/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Update like count
+          document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
+          
+          // Update dislike count
+          document.querySelector(`#dislike-count-${tweetId}`).textContent = data.total_dislikes;
+          
+          // Update button states
+          if (data.liked) {
+            this.classList.add('liked');
+            document.querySelector('.dislike-btn').classList.remove('disliked');
+          } else {
+            this.classList.remove('liked');
+          }
+          
+          // Remove processing class
+          this.classList.remove('processing');
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          this.classList.remove('processing');
+          alert('Error processing your request. Please try again.');
+        });
+      }
     });
     
     // Dislike button functionality
     document.querySelector('.dislike-btn').addEventListener('click', function() {
-      const tweetId = this.getAttribute('data-tweet-id');
-      
-      fetch(`/tweet/${tweetId}/dislike/`, {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': getCookie('csrftoken'),
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Update like count
-        document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
+      if (!this.classList.contains('processing')) {
+        this.classList.add('processing');
+        const tweetId = this.getAttribute('data-tweet-id');
         
-        // Update dislike count
-        document.querySelector(`#dislike-count-${tweetId}`).textContent = data.total_dislikes;
-        
-        // Update button states
-        if (data.disliked) {
-          this.classList.add('disliked');
-          document.querySelector('.like-btn').classList.remove('liked');
-        } else {
-          this.classList.remove('disliked');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+        fetch(`/tweet/${tweetId}/dislike/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Update like count
+          document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
+          
+          // Update dislike count
+          document.querySelector(`#dislike-count-${tweetId}`).textContent = data.total_dislikes;
+          
+          // Update button states
+          if (data.disliked) {
+            this.classList.add('disliked');
+            document.querySelector('.like-btn').classList.remove('liked');
+          } else {
+            this.classList.remove('disliked');
+          }
+          
+          // Remove processing class
+          this.classList.remove('processing');
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          this.classList.remove('processing');
+          alert('Error processing your request. Please try again.');
+        });
+      }
     });
     
     // Function to get CSRF token

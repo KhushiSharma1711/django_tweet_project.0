@@ -44,10 +44,23 @@ Tweet App - Home
                 </div>
                 
                 <div class="tweet-content-container">
+                  <!-- Edit/Delete buttons for text-only tweets -->
+                  {% if tweet.user == request.user %}
+                  <div class="tweet-controls">
+                    <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'tweet_delete' tweet.id %}" class="action-btn">
+                      <i class="fas fa-trash-alt"></i>
+                    </a>
+                  </div>
+                  {% endif %}
+                  
                   <div class="tweet-content">
                     {{ tweet.content }}
                   </div>
                   
+                  {% if tweet.has_media %}
                   <div class="tweet-media-container">
                     {% if tweet.img_url %}
                     <img src="{{ tweet.img_url }}" class="img-fluid tweet-img" alt="Tweet Image">
@@ -64,6 +77,7 @@ Tweet App - Home
                     </video>
                     {% endif %}
                   </div>
+                  {% endif %}
                 </div>
                 
                 <div class="tweet-footer">
@@ -85,17 +99,6 @@ Tweet App - Home
                         <i class="fas fa-expand-alt"></i>
                       </a>
                     </div>
-                    
-                    {% if tweet.user == request.user %}
-                    <div class="edit-delete-group">
-                      <a href="{% url 'tweet_edit' tweet.id %}" class="action-btn">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                      <a href="{% url 'tweet_delete' tweet.id %}" class="action-btn">
-                        <i class="fas fa-trash-alt"></i>
-                      </a>
-                    </div>
-                    {% endif %}
                   </div>
                   
                   <!-- Comments Section -->
@@ -140,10 +143,9 @@ Tweet App - Home
   </div>
 </div>
 
-<!-- JavaScript for Masonry-like layout -->
+<!-- JavaScript for Masonry-like layout and AJAX functionality -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Function to adjust grid layout based on screen size  function() {
     // Function to adjust grid layout based on screen size
     function adjustGridLayout() {
       const tweetsGrid = document.querySelector('.tweets-grid');
@@ -209,21 +211,27 @@ Tweet App - Home
     // Handle like button clicks
     document.querySelectorAll('.like-btn').forEach(button => {
       button.addEventListener('click', function() {
-        const tweetId = this.getAttribute('data-tweet-id');
-        likeOrDislikeTweet(tweetId, 'like');
+        if (!this.classList.contains('processing')) {
+          this.classList.add('processing');
+          const tweetId = this.getAttribute('data-tweet-id');
+          likeOrDislikeTweet(tweetId, 'like', this);
+        }
       });
     });
     
     // Handle dislike button clicks
     document.querySelectorAll('.dislike-btn').forEach(button => {
       button.addEventListener('click', function() {
-        const tweetId = this.getAttribute('data-tweet-id');
-        likeOrDislikeTweet(tweetId, 'dislike');
+        if (!this.classList.contains('processing')) {
+          this.classList.add('processing');
+          const tweetId = this.getAttribute('data-tweet-id');
+          likeOrDislikeTweet(tweetId, 'dislike', this);
+        }
       });
     });
     
     // Function to handle like or dislike
-    function likeOrDislikeTweet(tweetId, action) {
+    function likeOrDislikeTweet(tweetId, action, buttonElement) {
       const url = `/tweet/${tweetId}/${action}/`;
       
       fetch(url, {
@@ -234,7 +242,12 @@ Tweet App - Home
           'X-Requested-With': 'XMLHttpRequest'
         }
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
         // Update like count
         document.querySelector(`#like-count-${tweetId}`).textContent = data.total_likes;
@@ -261,9 +274,14 @@ Tweet App - Home
             dislikeBtn.classList.remove('disliked');
           }
         }
+        
+        // Remove processing class
+        buttonElement.classList.remove('processing');
       })
       .catch(error => {
         console.error('Error:', error);
+        buttonElement.classList.remove('processing');
+        alert('Error processing your request. Please try again.');
       });
     }
     
@@ -295,7 +313,12 @@ Tweet App - Home
           'X-Requested-With': 'XMLHttpRequest'
         }
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success) {
           // Build comments HTML
@@ -356,7 +379,12 @@ Tweet App - Home
           },
           body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             // Clear input
@@ -374,7 +402,7 @@ Tweet App - Home
         })
         .catch(error => {
           console.error('Error:', error);
-          alert('Error adding comment');
+          alert('Error adding comment. Please try again.');
         });
       });
     });

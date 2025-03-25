@@ -5,19 +5,21 @@ from django.http import JsonResponse
 from .forms import UserTweetForm
 from .models import Tweet, Comment
 from django import forms
+import os
 
 # Tweet form class
 class TweetForm(forms.ModelForm):
     img_url = forms.URLField(required=False, label="Image URL (optional)",
-                         widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Paste image URL here'}))
+                         widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Paste image URL here'}),
+                         max_length=2000)
   
     class Meta:
         model = Tweet
         fields = ['content', 'img_url', 'img', 'video']
         widgets = {
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What\'s happening?'}),
-            'img': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
-            'video': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'video/*'}),
+            'img': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'image/*', 'id': 'id_img'}),
+            'video': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'video/*', 'id': 'id_video'}),
         }
 
 # Comment form class
@@ -90,6 +92,18 @@ def tweet_edit(request, pk):
         form = TweetForm(request.POST, request.FILES, instance=tweet)
         if form.is_valid():
             tweet = form.save(commit=False)
+            
+            # Clear image if URL is provided and different from current
+            if form.cleaned_data.get('img_url') and tweet.img and form.cleaned_data.get('img_url') != tweet.img_url:
+                # Delete the old image file
+                if os.path.isfile(tweet.img.path):
+                    os.remove(tweet.img.path)
+                tweet.img = None
+                
+            # If new image is uploaded, remove the URL
+            if form.cleaned_data.get('img') and tweet.img_url:
+                tweet.img_url = None
+                
             tweet.save()
             return redirect('tweet_list')
     else:
@@ -103,6 +117,7 @@ def tweet_delete(request, pk):
         return redirect('tweet_list')
   
     if request.method == "POST":
+        # The delete method in the model will handle media deletion
         tweet.delete()
         return redirect('tweet_list')
     return render(request, 'delete.html', {'tweet': tweet})
@@ -110,6 +125,10 @@ def tweet_delete(request, pk):
 @login_required
 def like_tweet(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
+    
+    # Check if the request is AJAX
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     if request.user in tweet.likes.all():
         tweet.likes.remove(request.user)
         liked = False
@@ -119,16 +138,26 @@ def like_tweet(request, pk):
         # Remove dislike if exists
         if request.user in tweet.dislikes.all():
             tweet.dislikes.remove(request.user)
-  
-    return JsonResponse({
+    
+    response_data = {
         'liked': liked,
         'total_likes': tweet.total_likes(),
         'total_dislikes': tweet.total_dislikes()
-    })
+    }
+    
+    if is_ajax:
+        return JsonResponse(response_data)
+    else:
+        # For non-AJAX requests, redirect back to the page
+        return redirect('tweet_detail', pk=pk)
 
 @login_required
 def dislike_tweet(request, pk):
     tweet = get_object_or_404(Tweet, pk=pk)
+    
+    # Check if the request is AJAX
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     if request.user in tweet.dislikes.all():
         tweet.dislikes.remove(request.user)
         disliked = False
@@ -138,12 +167,18 @@ def dislike_tweet(request, pk):
         # Remove like if exists
         if request.user in tweet.likes.all():
             tweet.likes.remove(request.user)
-  
-    return JsonResponse({
+    
+    response_data = {
         'disliked': disliked,
         'total_likes': tweet.total_likes(),
         'total_dislikes': tweet.total_dislikes()
-    })
+    }
+    
+    if is_ajax:
+        return JsonResponse(response_data)
+    else:
+        # For non-AJAX requests, redirect back to the page
+        return redirect('tweet_detail', pk=pk)
 
 @login_required
 def add_comment(request, pk):
